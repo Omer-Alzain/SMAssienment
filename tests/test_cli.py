@@ -27,7 +27,7 @@ def test_preview_and_cancellation_do_not_move_files(tmp_path, monkeypatch):
     assert result == 0
     assert original.read_text() == "photo"
     assert not destination.exists()
-    assert any("PREVIEW" in line for line in output)
+    assert any("Preview" in line for line in output)
     assert any("Cancelled" in line for line in output)
 
 
