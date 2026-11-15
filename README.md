@@ -1,16 +1,18 @@
 # Smart Downloads Organizer
 
-A Python application that scans a directory, identifies file types, and organizes files into category-based folders.
+A Python command-line application that scans a directory, identifies file types, and organizes files into category-based folders. It provides an interactive workflow with a preview and requires confirmation before moving files.
 
 ## Features
 
+- **Interactive command-line interface:** Run the application without writing or editing Python code.
 - **Directory scanning:** Finds files in a selected directory, with optional recursive scanning.
 - **File categorization:** Classifies files based on their extensions.
 - **Automatic organization:** Moves files into category folders.
 - **Duplicate handling:** Renames duplicate files instead of overwriting existing files.
-- **Dry-run mode:** Previews planned file movements without modifying the filesystem.
-- **Error handling:** Reports unsuccessful operations and skips invalid sources.
-- **Logging:** Records organization activities and errors.
+- **Preview before changes:** Displays planned file movements without modifying the filesystem.
+- **Confirmation:** Files are moved only after the user types `YES`.
+- **Path validation:** Checks the source and destination and prevents using the source itself or a directory inside it as the destination.
+- **Error handling and logging:** Reports unsuccessful operations and records organizer activities and errors.
 
 ## Project Structure
 
@@ -19,10 +21,13 @@ SMAssienment/
 ├── categories.py
 ├── scanner.py
 ├── organizer.py
+├── run_organizer.py
 ├── tests/
 │   ├── test_categories.py
 │   ├── test_scanner.py
-│   └── test_organizer.py
+│   ├── test_organizer.py
+│   ├── test_integration.py
+│   └── test_cli.py
 ├── .gitignore
 └── README.md
 ```
@@ -32,7 +37,8 @@ SMAssienment/
 - `categories.py`: Defines supported file extensions and determines each file's category.
 - `scanner.py`: Scans directories and returns discovered files.
 - `organizer.py`: Handles file movement, duplicate filenames, dry-run operations, and errors.
-- `tests/`: Contains automated tests for the project components.
+- `run_organizer.py`: Provides the interactive command-line application.
+- `tests/`: Contains automated tests for categorization, scanning, organizing, integration, and the command-line workflow.
 
 ## File Categories
 
@@ -49,7 +55,7 @@ SMAssienment/
 ## Requirements
 
 - Python 3.10 or newer
-- pytest for running tests
+- pytest (only needed to run the tests)
 
 ## Installation
 
@@ -62,20 +68,83 @@ cd SMAssienment
 
 Create and activate a virtual environment:
 
+**Linux / macOS**
+
 ```bash
 python -m venv .venv
 source .venv/bin/activate
 ```
 
-Install pytest:
+**Windows (PowerShell)**
+
+```powershell
+python -m venv .venv
+.venv\\Scripts\\Activate.ps1
+```
+
+Install pytest if you want to run the test suite:
 
 ```bash
 python -m pip install pytest
 ```
 
+The organizer itself uses Python's standard library and does not require additional packages.
+
 ## Usage
 
-The project components can be used together from a Python script:
+From the repository root, run:
+
+```bash
+python run_organizer.py
+```
+
+The application will guide you through these steps:
+
+1. **Choose the source directory.** Enter the directory to organize, or press Enter to use the default `~/Downloads`.
+2. **Choose the destination directory.** Enter where organized files should go, or press Enter to use `~/OrganizedDownloads`.
+3. **Choose recursive scanning.** Enter `y` to include files in subdirectories, or press Enter to scan only the selected directory.
+4. **Review the preview.** The application lists each planned operation. No files have been moved at this stage.
+5. **Confirm the operation.** Type `YES` exactly to proceed. Any other input cancels the operation.
+
+After organization, the application displays the number of files moved, skipped, and affected by errors, along with the destination directory.
+
+### Example
+
+```text
+=== Smart Downloads Organizer ===
+Source directory [/home/user/Downloads]:
+Destination directory [/home/user/OrganizedDownloads]:
+Scan subdirectories recursively? [y/N]: n
+
+Found 3 file(s).
+
+Preview (no files have been moved):
+[PLANNED] /home/user/Downloads/photo.jpg -> /home/user/OrganizedDownloads/Images/photo.jpg
+[PLANNED] /home/user/Downloads/report.pdf -> /home/user/OrganizedDownloads/Documents/report.pdf
+[PLANNED] /home/user/Downloads/song.mp3 -> /home/user/OrganizedDownloads/Audio/song.mp3
+
+Type YES to organize these files. Any other input cancels: YES
+
+=== Organization complete ===
+Files moved: 3
+Files skipped: 0
+Errors: 0
+Destination: /home/user/OrganizedDownloads
+```
+
+The example paths and file counts are illustrative; your output depends on the files in your selected directory.
+
+### Safety Notes
+
+- Always review the preview before confirming.
+- The application does not overwrite existing files. Duplicate names receive a numbered suffix, such as `photo (1).jpg`.
+- The destination cannot be the same as the source directory or a directory inside it.
+- If you are unsure, test with a temporary folder containing copies of your files first.
+- Press Ctrl+C to interrupt the application.
+
+## Using the Python Modules Directly
+
+The modules can also be used programmatically from another Python script:
 
 ```python
 from scanner import scan_directory
@@ -87,23 +156,23 @@ destination = "~/OrganizedDownloads"
 
 files = scan_directory(source)
 
-# Preview the planned operations first.
+# Preview planned operations without moving files.
 preview = organize_files(
     files,
     destination,
     category_for,
-    dry_run=True
+    dry_run=True,
 )
 
 for operation in preview:
     print(operation)
 
-# Execute the organization after reviewing the preview.
+# Execute only after reviewing the preview.
 results = organize_files(
     files,
     destination,
     category_for,
-    dry_run=False
+    dry_run=False,
 )
 
 for result in results:
@@ -112,18 +181,18 @@ for result in results:
 
 ## Running Tests
 
-Run the automated test suite:
+Run the full automated test suite from the repository root:
 
 ```bash
 python -m pytest -v
 ```
 
-The tests cover file categorization, directory scanning, safe file organization, duplicate handling, dry-run behavior, and error handling.
+The current suite contains **30 tests** covering file categorization, directory scanning, safe organization, duplicate handling, dry-run behavior, integration, and the interactive command-line workflow.
 
 ## Team Responsibilities
 
 - **Omer:** Directory scanning and file-category detection.
-- **Momen:** File organization, safe movement, duplicate handling, and organizer tests.
+- **Momen:** File organization, safe movement, duplicate handling, and the interactive command-line interface.
 
 ## License
 
