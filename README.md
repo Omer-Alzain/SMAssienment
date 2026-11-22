@@ -79,7 +79,7 @@ source .venv/bin/activate
 
 ```powershell
 python -m venv .venv
-.venv\\Scripts\\Activate.ps1
+.venv\Scripts\Activate.ps1
 ```
 
 Install pytest if you want to run the test suite:
